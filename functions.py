@@ -329,7 +329,7 @@ def human_hand_and_offsets():
 
 def computer_hand_and_offsets():
     computer_hand = players_dict['Computer']
-    computer_hand_images = player_hand_images(computer_hand, False)
+    computer_hand_images = player_hand_images(computer_hand, True)
     computer_offset_x = 200
     computer_offset_y = 100
     return computer_hand, computer_hand_images, computer_offset_x, computer_offset_y
