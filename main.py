@@ -3,22 +3,16 @@ import tkinter as tk
 from functions import *
 import time
 
-# create the deck of cards
 cards = build_deck()
 
-# shuffle the cards
 shuffled_cards = get_shuffled_deck(cards)
 
-# setting up main game window
 window = tk.Tk()
 window.title("UNO")
 
-# setting up the size of the window
 canvas = tk.Canvas(window, width=1200, height=900, bg='black')
 canvas.pack()
 
-# print(cards)
-# deal cards to the players
 shuffled_cards, players_dict = deal_shuffled_cards(shuffled_cards, players_dict)
 
 turn_idx = 0
@@ -28,7 +22,6 @@ len_pile_after_action = len(discard_pile)
 resume_program = False
 hand_before_play = len(players_dict['Human'])
 
-# check if first card picked is not a wild card
 discard_pile, shuffled_cards, human_played = first_card_not_wild(shuffled_cards)
 
 
@@ -39,10 +32,8 @@ while True:
     draw_pile_img_ref = ImageTk.PhotoImage(draw_pile_img)
     draw_pile_id = canvas.create_image(250, 450, image = draw_pile_img_ref)
     
-     # add cards to player hand when you click on the draw pile
     canvas.tag_bind(draw_pile_id, '<Button-1>', lambda event: click_on_draw_pile(event,players_dict, shuffled_cards, draw_pile_id, canvas, human_hand, last_card_discarded))
             
-    # create and show discard pile
     last_card_discarded = discard_pile[-1]
     card_color, card_action = get_card_color_and_action(last_card_discarded)
     if card_action != None:
@@ -53,11 +44,9 @@ while True:
     last_card_discarded_img_ref = ImageTk.PhotoImage(last_card_discarded_img)
     canvas.create_image(900, 450, image = last_card_discarded_img_ref)
 
-    # computer cards will be displayed at the top of the screen
     computer_hand, computer_hand_images, computer_offset_x, computer_offset_y = computer_hand_and_offsets()
     display_hand(canvas, computer_hand_images, computer_offset_x, computer_offset_y, True, 'computer_hand_tag', computer_hand, '')
 
-    # human cards will be displayed at the bottom of the screen
     human_hand, human_hand_images, human_offset_x, human_offset_y = human_hand_and_offsets()
     card_id_list = display_hand(canvas, human_hand_images, human_offset_x, human_offset_y, False, 'human_hand_tag', human_hand, last_card_discarded)
     print(human_hand)

@@ -170,6 +170,9 @@ def display_hand(canvas, hand_images, x_offset:int, y_offset:int, is_computer:bo
         x_offset (_int_): _x cordinate of where the cards will start_
         y_offset (_int_): _y cordinate of where the cards will start_
         is_computer (bool): _if the player is a computer or not_
+    
+    returns:
+        (list) card ids
     """
     max_cards_per_row = 7  
     row_cards = 0  
@@ -201,8 +204,6 @@ def click_on_draw_pile(event, players_dict:dict, shuffled_cards:list, draw_pile_
         players_dict (_dict_): _description_
         shuffled_cards (_list_): _description_
 
-    Returns:
-        _type_: _description_
     """
     
     x1, y1, x2, y2 = canvas.bbox(draw_pile_id)
@@ -212,11 +213,16 @@ def click_on_draw_pile(event, players_dict:dict, shuffled_cards:list, draw_pile_
     human_hand, human_hand_images, human_offset_x, human_offset_y = human_hand_and_offsets()
     display_hand(canvas, human_hand_images, human_offset_x, human_offset_y, False, 'human_hand_tag', player_hand, last_card_discarded)
 
-    return players_dict, shuffled_cards
 
+def first_card_not_wild(shuffled_cards:list):
+    """Ensures that the first card placed in the game is not a wild card.
 
-# check if first card placed down is a wild card
-def first_card_not_wild(shuffled_cards):
+    Args:
+        shuffled_cards (list): list of the game cards shuffled
+
+    Returns:
+        _type_: _description_
+    """
     first_card = shuffled_cards[0]
     human_played = False
     while True:
@@ -233,7 +239,18 @@ def first_card_not_wild(shuffled_cards):
     return discard_pile, shuffled_cards, human_played
 
 
-def is_card_valid(last_card_discarded, player_card):
+def is_card_valid(last_card_discarded:str, player_card:str):
+    """Checks if the player's card can be played based on the last discarded card.
+    A card can be played if it matches the color, number, or type (such as Wild or Reverse) of the last card discarded.
+
+
+    Args:
+        last_card_discarded (str): last card to be discarded in the discard pile.
+        player_card (str): player card from the player's hand.
+
+    Returns:
+        (bool): True if the card can be played
+    """
     last_card_discarded_color, last_card_discarded_action = get_card_color_and_action(last_card_discarded)
     card_color, card_action = get_card_color_and_action(player_card)
     
@@ -254,9 +271,24 @@ def is_card_valid(last_card_discarded, player_card):
     return False
 
 
-def card_clicked_is_playable(event, card, last_card_discarded, player_hand, players_dict, canvas, human_offset_x, human_offset_y):
+def card_clicked_is_playable(event, card:str, last_card_discarded:str, player_hand:list, players_dict:dict, canvas, human_offset_x:int, human_offset_y:int):
+    """ Checks if the card the human player clicked can be played based on the current game state.
+
+    This function verifies whether the clicked card matches the required conditions to be played, 
+    including checking if the card is valid to play (based on the last discarded card) and whether 
+    it belongs to the player's hand.
+
+    Args:
+        event : The event triggered by the user clicking the card. This typically contains information about the click event such as the location on the canvas.
+        card (str): The card that the human player clicked.
+        last_card_discarded (str): The card that was last discarded.
+        player_hand (list): A list of cards currently in the player's hand.
+        players_dict (dict): A dictionary containing information about all players.
+        canvas : The game canvas or visual component where cards are displayed
+        human_offset_x (int): The horizontal offset (X position).
+        human_offset_y (int): The vertical offset (Y position).
+    """
     if is_card_valid(last_card_discarded, card): 
-        print(card)
         card_idx = player_hand.index(card) 
         player_hand.pop(card_idx)
         players_dict['Human'] = player_hand
@@ -265,14 +297,20 @@ def card_clicked_is_playable(event, card, last_card_discarded, player_hand, play
         discard_pile.append(card)
             
 
-def pop_ip_winner(is_computer):
+def pop_up_winner(is_computer:bool):
+    """Displays a pop-up message indicating the winner of the game.
+
+    This function creates a pop-up on the game's canvas to announce the winner. The pop-up will show a message
+    with the name or identifier of the winning player, providing feedback to the players.
+
+    Args:
+        is_computer (bool): True if the winner is a computer
+    """
     popup = tk.Toplevel()
     popup.title("WINNER!!!!!")
 
-    # size of popup
     popup.geometry('600x600')
 
-    # label inside of popup
     if is_computer:
         label = tk.Label(popup, text= f'COMPUTER WON!!!!')
         label.pack(padx=20)
@@ -281,12 +319,24 @@ def pop_ip_winner(is_computer):
         label = tk.Label(popup, text= f'YOU WON!!!!')
         label.pack(padx=20)
     
-    # button to close popup
     close_button = tk.Button(popup, text='Close', command=popup.destroy)
     close_button.pack()
 
 
-def get_playable_cards(player_hand, last_card_discarded):
+def get_playable_cards(player_hand:list, last_card_discarded:list):
+    """Returns a list of cards from the player's hand that can be played based on the last discarded card.
+
+    A card is considered playable if it matches the color, number, or type (such as Wild or Reverse) 
+    of the last discarded card. If the card is a Wild card, it can always be played.
+
+
+    Args:
+        player_hand (list): A list of cards currently in the player's hand.
+        last_card_discarded (list): The card that was last discarded.
+
+    Returns:
+        playable_cards (list) : A list of cards from the player's hand that are valid to play. The list is empty if no cards are playable.
+    """
     playable_cards = []
     for card in player_hand:
         if is_card_valid(last_card_discarded, card):
@@ -321,6 +371,19 @@ def computer_play(computer_hand, player_name, players_dict, last_card_discarded,
 
 
 def human_hand_and_offsets():
+    """Retrieves the human player's hand of cards and their display offsets.
+
+    This function fetches the human player's hand from the `players_dict`, converts the hand into a list of 
+    images using the `player_hand_images` function, and provides the horizontal and vertical offsets for 
+    displaying the hand on the canvas.
+
+
+    Returns:
+        - human_hand (list): A list of cards in the human player's hand.
+        - human_hand_images (list): A list of images representing the cards in the human player's hand.
+        - human_offset_x (int): The horizontal offset (X position) for displaying the human player's hand on the canvas.
+        - human_offset_y (int): The vertical offset (Y position) for displaying the human player's hand on the canvas.
+    """
     human_hand = players_dict['Human']
     human_hand_images = player_hand_images(human_hand, False)
     human_offset_x = 200
@@ -328,6 +391,19 @@ def human_hand_and_offsets():
     return human_hand, human_hand_images, human_offset_x, human_offset_y
 
 def computer_hand_and_offsets():
+    """Retrieves the computer player's hand of cards and their display offsets.
+
+    This function fetches the computer player's hand from the `players_dict`, converts the hand into a list of 
+    images using the `player_hand_images` function, and provides the horizontal and vertical offsets for 
+    displaying the hand on the canvas.
+
+    Returns:
+        - computer_hand (list): A list of cards in the computer player's hand.
+        - computer_hand_images (list): A list of images representing the cards in the computer player's hand.
+        - computer_offset_x (int): The horizontal offset (X position) for displaying the computer player's hand on the canvas.
+        - computer_offset_y (int): The vertical offset (Y position) for displaying the computer player's hand on the canvas.
+    
+    """
     computer_hand = players_dict['Computer']
     computer_hand_images = player_hand_images(computer_hand, True)
     computer_offset_x = 200
@@ -356,22 +432,22 @@ def pick_new_color(players_hand, is_computer):
 
     return new_color
 
-def wild_card_popup(card, player_name, new_color):
-    popup = tk.Tk()
-    popup.title(f'{player_name} put down {card}')
+# def wild_card_popup(card, player_name, new_color):
+#     popup = tk.Tk()
+#     popup.title(f'{player_name} put down {card}')
 
-    if 'draw4' in card:
-        if 'Computer' in player_name:
-            label = tk.Label(popup, text=f'You picked up 4 cards \nGame color changed to {new_color}')
-            label.pack(padx=20, pady=20)
-        else:
-            label = tk.Label(popup, text=f'Computer picked up 4 cards \nGame color changed to {new_color}')
-            label.pack(padx=20, pady=20)
-    else:
-        label = tk.Label(popup, text=f'You picked up 4 cards \nGame color changed to {new_color}')
-        label.pack(padx=20, pady=20)
+#     if 'draw4' in card:
+#         if 'Computer' in player_name:
+#             label = tk.Label(popup, text=f'You picked up 4 cards \nGame color changed to {new_color}')
+#             label.pack(padx=20, pady=20)
+#         else:
+#             label = tk.Label(popup, text=f'Computer picked up 4 cards \nGame color changed to {new_color}')
+#             label.pack(padx=20, pady=20)
+#     else:
+#         label = tk.Label(popup, text=f'You picked up 4 cards \nGame color changed to {new_color}')
+#         label.pack(padx=20, pady=20)
 
-def is_action_done(len_pile_after_action, discard_pile):
-    if len_pile_after_action == len(discard_pile):
-        return True
-    return False
+# def is_action_done(len_pile_after_action, discard_pile):
+#     if len_pile_after_action == len(discard_pile):
+#         return True
+#     return False
